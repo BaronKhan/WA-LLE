@@ -1,5 +1,9 @@
 # HCR-walker
-I'm thinking the top-level directory of this repo should just be a single package, and all the ROS nodes should be contained in this package (we clone this repo in the src/ directory our own catkin workspaces).
+This repo contains a single catkin-style ROS package, and all the ROS nodes should be contained in this package (we clone this repo in the src/ directory our own catkin workspaces).
+
+Current code is just the basic publisher/subscriber example for C++. A similar setup is possible with Python, following [this tutorial](http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28python%29).
+
+*This README should always reflect the current state of the repository. If you create a new node, please add it to the Nodes section below with a short description and update the Usage instructions as necessary.*
 
 ## Usage
 1. Clone this repo/package into your [catkin workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace).
@@ -31,6 +35,10 @@ You should see messages printing on the terminal, corresponding to the message b
 rosrun beginner_tutorials listener
 ```
 You should see messages printing on the terminal, corresponding to the messages received (should be same as those sent by the talker).
+
+## Nodes
+- `talker` : Basic subsrciber example
+- `listener` : Basic publisher example
 
 ## Checklist
 - [x] Design report
