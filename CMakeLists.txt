@@ -29,6 +29,4 @@ target_link_libraries(listener ${catkin_LIBRARIES})
 add_executable(hcr_imu src/hcr_imu.cpp)
 target_link_libraries(hcr_imu ${catkin_LIBRARIES})
 
-add_executable(dummy_listener src/dummy_listener.cpp)
-target_link_libraries(dummy_listener ${catkin_LIBRARIES})
 # %EndTag(FULLTEXT)%
