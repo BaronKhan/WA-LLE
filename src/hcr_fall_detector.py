@@ -12,6 +12,9 @@ FALLEN_THRESHOLD = 2.25  #1.5g*1.5g; saves us from having to calc. sqrt
 falling_state = STATE_NORMAL
 pub_falling_state = rospy.Publisher('falling_state', Int8, queue_size=1)
 
+imu_pos = []
+gait_raw = []
+
 def kill_process(signal, frame):
   print("Exiting hcr_fall_detector...")
   sys.exit(0)
@@ -28,26 +31,24 @@ def on_fallen():
   change_state(STATE_NORMAL)
 
 def imu_callback(data):
-  imu = data.data
-  ax, ay, az = imu[0], imu[1], imu[2]
-  wx, wy, wz = imu[3], imu[4], imu[5]
+  global imu_pos
+  imu_pos = data.data
+  ax, ay, az = imu_pos[0], imu_pos[1], imu_pos[2]
+  wx, wy, wz = imu_pos[3], imu_pos[4], imu_pos[5]
   accel_mag = (ax*ax) + (ay*ay) + (az*az)
   if accel_mag >= FALLEN_THRESHOLD:
     print("Fall detected! accel_mag = "+str(accel_mag))
     on_fallen()
 
 def gait_callback():
+  global gait_raw
   pass
 
 # Kill process with Ctrl+C
 signal.signal(signal.SIGINT, kill_process)
 
 rospy.init_node('hcr_fall_detector', anonymous=True)
-
-imu_pos = []
 rospy.Subscriber("imu_pos", Float32MultiArray, imu_callback)
-
-gait_raw = []
 rospy.Subscriber("gait_raw", Float64MultiArray, gait_callback)
 
 if __name__ == '__main__':
