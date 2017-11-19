@@ -1,0 +1,5 @@
+# Run sudo pip install -r requirements.txt
+# to install these required Python libraries
+
+# For hcr_fall_data_collector
+curses

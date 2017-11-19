@@ -2,6 +2,10 @@
 import rospy, time, sys, signal, csv, os, errno
 from std_msgs.msg import Float32MultiArray, Float64MultiArray
 
+# Get keyboard input
+# https://ubuntuforums.org/showthread.php?t=1514035&p=9488711#post9488711
+import curses
+
 STATE_NORMAL = 0
 STATE_FALLING = 1
 
@@ -43,22 +47,37 @@ def init_data():
   print("Writing data to "+str(file_name))
   return open(file_name, "wb")
 
-def add_data(csv_file):
+def add_data(csv_file, win):
   global imu_pos, gait_raw, falling_state
   if (len(imu_pos) > 0) and (len(gait_raw) > 0):
     row = list(imu_pos + gait_raw)
     row.append(falling_state)
-    print("Writing row: "+str(row))
+    print("\rWriting row: "+str(row))
     writer = csv.writer(csv_file)
     writer.writerow(row)
+
+def poll_falling_state(win):
+  global falling_state
+  try:
+    key = win.getkey()
+  except: # in no delay mode getkey raise and exeption if no key is pressed
+    key = None
+    falling_state = STATE_NORMAL
+  if key == "f":
+    falling_state = STATE_FALLING
 
 rospy.init_node('hcr_fall_data_collection', anonymous=True)
 rospy.Subscriber("imu_pos", Float32MultiArray, imu_callback)
 rospy.Subscriber("gait_raw", Float64MultiArray, gait_callback)
 
-if __name__ == '__main__':
+def main(win):
+  win.nodelay(True) # make getkey() not wait
   csv_file = init_data()
   while True:
-    add_data(csv_file)
+    poll_falling_state(win)
+    add_data(csv_file, win)
     # Sleep to avoid consuming all the CPU at once
     time.sleep(0.1)
+
+if __name__ == '__main__':
+  curses.wrapper(main)
