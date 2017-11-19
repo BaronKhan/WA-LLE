@@ -10,7 +10,7 @@ STATE_FALLEN = 2
 FALLEN_THRESHOLD = 2.25  #1.5g*1.5g; saves us from having to calc. sqrt
 
 falling_state = STATE_NORMAL
-pub_falling_state = rospy.Publisher('falling_state', Int8, queue_size=10)
+pub_falling_state = rospy.Publisher('falling_state', Int8, queue_size=1)
 
 def kill_process(signal, frame):
   print("Exiting hcr_fall_detector...")
