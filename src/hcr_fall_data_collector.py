@@ -14,7 +14,7 @@ gait_raw = []
 falling_state = STATE_NORMAL  # To be observed and recorded
 
 def kill_process(signal, frame):
-  print("Exiting hcr_fall_detector...")
+  print("Exiting hcr_fall_data_collector...")
   sys.exit(0)
 
 # Kill process with Ctrl+C
@@ -60,18 +60,18 @@ def poll_falling_state(win):
   global falling_state
   try:
     key = win.getkey()
-  except: # in no delay mode getkey raise and exeption if no key is pressed
+  except: # In no delay mode getkey raises an exception if no key is pressed
     key = None
     falling_state = STATE_NORMAL
   if key == "f":
     falling_state = STATE_FALLING
 
-rospy.init_node('hcr_fall_data_collection', anonymous=True)
+rospy.init_node('hcr_fall_data_collector', anonymous=True)
 rospy.Subscriber("imu_pos", Float32MultiArray, imu_callback)
 rospy.Subscriber("gait_raw", Float64MultiArray, gait_callback)
 
 def main(win):
-  win.nodelay(True) # make getkey() not wait
+  win.nodelay(True) # Make getkey() not wait
   csv_file = init_data()
   while True:
     poll_falling_state(win)
