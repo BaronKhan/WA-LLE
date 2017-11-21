@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-import rospy, sys, csv, os
+import rospy, sys, csv, os, pickle
 from sklearn import svm
 
 rospy.init_node('hcr_fall_detector_trainer', anonymous=True)
 
 if __name__ == '__main__':
   # Build up X and Y
-  X = []
-  Y = []
+  X = []  # List of fall data
+  Y = []  # List of corresponding falling states (0 or 1)
 
   # Loop through files: fall_data_0.csv, fall_data_1.csv, etc.
   file_count = 0
@@ -16,16 +16,10 @@ if __name__ == '__main__':
     print("reading "+file_name)
     with open(file_name) as csvfile:
       reader = csv.reader(csvfile)
-      # # x contains the current 10 samples
-      # x = []
       for row in reader:
         row = [float(i) for i in row]
         y = row[-1]
         row = row[:-1]  # Remove y from row
-        # x.append(row)
-        # if (len(x) > 10):
-        #   del x[0]
-        # if (len(x) == 10):
         X.append(row)
         Y.append(y)
     file_count += 1
@@ -38,6 +32,23 @@ if __name__ == '__main__':
     clf = svm.SVC().fit(X,Y)
 
   if clf:
-    x_test=[[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]]
-    y_test=clf.predict(x_test)
-    print(y_test)
+    # Test model
+    # x_test=[[1.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]]
+    # y_test=clf.predict(x_test)
+    # print(y_test)
+
+    # Save model using pickle
+    # Let's not overwrite existing models just in case
+    file_count = 0
+    while (os.path.isfile("w/svm_"+str(file_count)+".mdl")):
+      file_count += 1
+    file_name = "w/svm_"+str(file_count)+".mdl"
+    with open(file_name, 'wb') as fp:
+      pickle.dump(clf, fp, protocol=1)
+    print("saved model to "+file_name)
+
+    # Test deserialisation
+    # clf = pickle.load( open( file_name, "rb" ) )
+    # x_test=[[1.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]]
+    # y_test=clf.predict(x_test)
+    # print(y_test)
