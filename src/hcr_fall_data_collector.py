@@ -75,6 +75,7 @@ def main(win):
   csv_file = init_data()
   while True:
     poll_falling_state(win)
+    curses.flushinp() # clear input buffer (it built up while sleeping)
     add_data(csv_file, win)
     # Sleep to avoid consuming all the CPU at once
     time.sleep(0.1)
