@@ -24,7 +24,7 @@ if __name__ == '__main__':
         Y.append(y)
     file_count += 1
   if file_count == 0:
-    print("error: no input CSV files found in w/ directory")
+    print("error: no input csv files found in w/ directory")
     sys.exit(0)
 
   clf=None
@@ -32,11 +32,6 @@ if __name__ == '__main__':
     clf = svm.SVC().fit(X,Y)
 
   if clf:
-    # Test model
-    # x_test=[[1.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]]
-    # y_test=clf.predict(x_test)
-    # print(y_test)
-
     # Save model using pickle
     # Let's not overwrite existing models just in case
     file_count = 0
