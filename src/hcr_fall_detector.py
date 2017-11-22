@@ -10,6 +10,10 @@ STATE_FALLEN = 2
 
 FALLEN_THRESHOLD = 2.25  #1.5g*1.5g; saves us from having to calc. sqrt
 
+# Toggle features
+using_fall_detection = True
+using_fall_prevention = True
+
 falling_state = STATE_NORMAL
 pub_falling_state = rospy.Publisher('falling_state', Int8, queue_size=1)
 
@@ -33,24 +37,57 @@ def on_fallen():
   time.sleep(5)
   change_state(STATE_NORMAL)
 
-def on_falling():
-  change_state(STATE_FALLING)
-  time.sleep(5)
-  change_state(STATE_NORMAL)
+def check_fallen():
+  ax, ay, az = imu_pos[0], imu_pos[1], imu_pos[2]
+  wx, wy, wz = imu_pos[3], imu_pos[4], imu_pos[5]
+  accel_mag = (ax*ax) + (ay*ay) + (az*az)
+  if using_fall_detection and accel_mag >= FALLEN_THRESHOLD:
+    print("Fall detected! accel_mag = "+str(accel_mag))
+    on_fallen()
 
 def imu_callback(data):
   global imu_pos
   imu_pos = data.data
-  ax, ay, az = imu_pos[0], imu_pos[1], imu_pos[2]
-  wx, wy, wz = imu_pos[3], imu_pos[4], imu_pos[5]
-  accel_mag = (ax*ax) + (ay*ay) + (az*az)
-  if accel_mag >= FALLEN_THRESHOLD:
-    print("Fall detected! accel_mag = "+str(accel_mag))
-    on_fallen()
+  check_fallen()
 
 def gait_callback(data):
   global gait_raw
   gait_raw = data.data
+
+def load_svm_model():
+  global svm_clf, using_fall_prevention
+  # model path should be the first argument of the python program (w/svm_0.mdl)
+  file_count = 0
+  if (len(sys.argv) > 1):
+    if (os.path.isfile(sys.argv[1])):
+      try:
+        svm_clf = pickle.load(open(sys.argv[1], "rb"))
+        print("loaded "+sys.argv[1])
+      except pickle.UnpicklingError:
+        raise
+      except Exception as e:
+        raise pickle.UnpicklingError(repr(e))
+    else:
+      using_fall_prevention = False
+      print(sys.argv[1]+" is not a valid path to a model\nfall prevention: disabled")
+  else:
+    print("warning: no svm model specified\nsvm_0.mdl will be loaded")
+    if (os.path.isfile("w/svm_0.mdl")):
+      try:
+        svm_clf = pickle.load(open("w/svm_0.mdl", "rb"))
+        print("loaded svm_0.mdl")
+      except pickle.UnpicklingError:
+        raise
+      except Exception as e:
+        raise pickle.UnpicklingError(repr(e))
+    else:
+      using_fall_prevention = False
+      print("could not load svm_0.mdl\nfall prevention: disabled")
+
+def on_falling():
+  change_state(STATE_FALLING)
+  time.sleep(5)
+  change_state(STATE_NORMAL)
 
 def check_falling():
   global imu_pos, gait_raw, svm_clf
@@ -71,12 +108,12 @@ rospy.Subscriber("imu_pos", Float32MultiArray, imu_callback)
 rospy.Subscriber("gait_raw", Float64MultiArray, gait_callback)
 
 if __name__ == '__main__':
-  # Load SVM model
-  # TODO: Choose which model to load (right now just svm_0.mdl)
-  if (os.path.isfile("w/svm_0.mdl")):
-    svm_clf = pickle.load( open( "w/svm_0.mdl", "rb" ) )
-    print("loaded svm_0.mdl")
+  print("fall detection: "+("enabled" if using_fall_detection else "disabled"))
+  print("fall prevention: "+("enabled" if using_fall_prevention else "disabled"))
+  if using_fall_prevention:
+    load_svm_model()
   while True:
-    check_falling()
+    if using_fall_prevention:
+      check_falling()
     # Sleep to avoid consuming all the CPU at once
     time.sleep(0.1)
