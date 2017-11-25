@@ -39,6 +39,12 @@ You should see messages printing on the terminal, corresponding to the messages 
 ## Nodes
 - `talker` : Basic subsrciber example
 - `listener` : Basic publisher example
+- `fall_data_collector`: collects fall data from IMU and gait analysis, and writes them to CSV files
+- `fall_detector`: determines the falling state of the user
+- `fall_detector_trainer`: creates an SVM classification model
+
+#### Fall Detection Requirements
+The fall detector nodes need SciPy and sklearn. Install them on the Rapsberry Pi using `sudo apt-get install python-scipy python-sklearn`
 
 ## Checklist
 - [x] Design report
