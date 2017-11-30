@@ -8,11 +8,11 @@ STATE_NORMAL = 0
 STATE_FALLING = 1
 STATE_FALLEN = 2
 
-FALLEN_THRESHOLD = 2.25  #1.5g*1.5g; saves us from having to calc. sqrt
+# FALLEN_THRESHOLD = 2.25  #1.5g*1.5g; saves us from having to calc. sqrt
 
 # Toggle features
 using_fall_detection = True
-using_fall_prevention = True
+using_fall_prevention = False
 
 falling_state = STATE_NORMAL
 pub_falling_state = rospy.Publisher('falling_state', Int8, queue_size=1)
@@ -37,18 +37,20 @@ def on_fallen():
   time.sleep(5)
   change_state(STATE_NORMAL)
 
-def check_fallen():
-  ax, ay, az = imu_pos[0], imu_pos[1], imu_pos[2]
-  wx, wy, wz = imu_pos[3], imu_pos[4], imu_pos[5]
-  accel_mag = (ax*ax) + (ay*ay) + (az*az)
-  if using_fall_detection and accel_mag >= FALLEN_THRESHOLD:
-    print("Fall detected! accel_mag = "+str(accel_mag))
-    on_fallen()
+
+# OUTDATED: using SVM method instead for fall detection
+# def check_fallen():
+#   ax, ay, az = imu_pos[0], imu_pos[1], imu_pos[2]
+#   wx, wy, wz = imu_pos[3], imu_pos[4], imu_pos[5]
+#   accel_mag = (ax*ax) + (ay*ay) + (az*az)
+#   if using_fall_detection and accel_mag >= FALLEN_THRESHOLD:
+#     print("Fall detected! accel_mag = "+str(accel_mag))
+#     on_fallen()
 
 def imu_callback(data):
   global imu_pos
   imu_pos = data.data
-  check_fallen()
+  # check_fallen()
 
 def gait_callback(data):
   global gait_raw
@@ -96,9 +98,12 @@ def check_falling():
   fall_data=[imu_pos+gait_raw]
   if svm_clf:
     y=round(svm_clf.predict(fall_data))
-    if y == 1: # either 0 or 1
+    if y == 1 and using_fall_prevention:
       print("User is falling!")
       on_falling()
+    elif y == 2 and using fall_detection:
+      print("User has fallen!")
+      on_fallen()
 
 # Kill process with Ctrl+C
 signal.signal(signal.SIGINT, kill_process)
@@ -110,10 +115,10 @@ rospy.Subscriber("gait_raw", Float64MultiArray, gait_callback)
 if __name__ == '__main__':
   print("fall detection: "+("enabled" if using_fall_detection else "disabled"))
   print("fall prevention: "+("enabled" if using_fall_prevention else "disabled"))
-  if using_fall_prevention:
+  if using_fall_prevention or using_fall_detection:
     load_svm_model()
   while True:
-    if using_fall_prevention:
+    if using_fall_prevention or using_fall_detection:
       check_falling()
     # Sleep to avoid consuming all the CPU at once
     time.sleep(0.1)
