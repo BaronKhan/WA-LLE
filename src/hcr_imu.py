@@ -16,9 +16,10 @@ def hcr_imu():
     tag = sensortag.SensorTag(mac_address)
     time.sleep(1.0)
     tag.accelerometer.enable()
+    tag.gyroscope.enable()
     while not rospy.is_shutdown():
         imuData = Float32MultiArray()
-	imuData.data = tag.accelerometer.read()
+	imuData.data = tag.accelerometer.read()+tag.gyroscope.read()
         rospy.loginfo(imuData)
         pub.publish(imuData)
         rate.sleep()
