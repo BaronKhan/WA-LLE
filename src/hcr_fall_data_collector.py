@@ -8,6 +8,7 @@ import curses
 
 STATE_NORMAL = 0
 STATE_FALLING = 1
+STATE_FALLEN = 2
 
 imu_pos = []
 gait_raw = []
@@ -65,6 +66,8 @@ def poll_falling_state(win):
     falling_state = STATE_NORMAL
   if key == "f":
     falling_state = STATE_FALLING
+  elif key == "d":
+    falling_state = STATE_FALLEN
 
 rospy.init_node('hcr_fall_data_collector', anonymous=True)
 rospy.Subscriber("imu_pos", Float32MultiArray, imu_callback)

@@ -10,7 +10,7 @@ from std_msgs.msg import Float32MultiArray
 
 def hcr_imu():
     mac_address = '24:71:89:E6:30:81'
-    pub = rospy.Publisher('imu_pos', Float32MultiArray, queue_size=1000)
+    pub = rospy.Publisher('imu_pos', Float32MultiArray, queue_size=1)
     rospy.init_node('hcr_imu', anonymous=True)
     rate = rospy.Rate(10) # 10hz
     tag = sensortag.SensorTag(mac_address)
@@ -19,7 +19,7 @@ def hcr_imu():
     tag.gyroscope.enable()
     while not rospy.is_shutdown():
         imuData = Float32MultiArray()
-	imuData.data = tag.accelerometer.read()+tag.gyroscope.read()
+        imuData.data = tag.accelerometer.read()+tag.gyroscope.read()
         rospy.loginfo(imuData)
         pub.publish(imuData)
         rate.sleep()
