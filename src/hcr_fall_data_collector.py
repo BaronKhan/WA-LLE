@@ -68,7 +68,7 @@ def poll_falling_state(win):
     falling_state = STATE_FALLING
   elif key == "d":
     falling_state = STATE_FALLEN
-    gait_raw = [0,0,0,0,0,0]  # redundant data
+    gait_raw = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]  # redundant data
 
 
 rospy.init_node('hcr_fall_data_collector', anonymous=True)

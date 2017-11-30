@@ -101,7 +101,7 @@ def check_falling():
     if y == 1 and using_fall_prevention:
       print("User is falling!")
       on_falling()
-    gait_raw = [0,0,0,0,0,0] # Replace gait data with zeros
+    gait_raw = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] # Replace gait data with zeros
     fall_data=[imu_pos+gait_raw]
     y=round(svm_clf.predict(fall_data))
     if y == 2 and using fall_detection:
