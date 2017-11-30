@@ -58,7 +58,7 @@ def add_data(csv_file, win):
     writer.writerow(row)
 
 def poll_falling_state(win):
-  global falling_state
+  global falling_state, gait_raw
   try:
     key = win.getkey()
   except: # In no delay mode getkey raises an exception if no key is pressed
@@ -68,6 +68,8 @@ def poll_falling_state(win):
     falling_state = STATE_FALLING
   elif key == "d":
     falling_state = STATE_FALLEN
+    gait_raw = [0,0,0,0,0,0]  # redundant data
+
 
 rospy.init_node('hcr_fall_data_collector', anonymous=True)
 rospy.Subscriber("imu_pos", Float32MultiArray, imu_callback)
