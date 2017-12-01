@@ -3,8 +3,10 @@ cmake_minimum_required(VERSION 2.8.3)
 project(hcr_walker)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg)
-
+find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg 
+    sensor_msgs cv_bridge std_msgs image_transport
+    pcl_conversions pcl_ros
+)
 ## Declare ROS messages and services
 #add_message_files(FILES Num.msg)
 #add_service_files(FILES AddTwoInts.srv)
@@ -20,11 +22,9 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_executable(talker src/talker.cpp)
 target_link_libraries(talker ${catkin_LIBRARIES})
-#add_dependencies(talker beginner_tutorials_generate_messages_cpp)
 
 add_executable(listener src/listener.cpp)
 target_link_libraries(listener ${catkin_LIBRARIES})
-#add_dependencies(listener beginner_tutorials_generate_messages_cpp)
 
 add_executable(hcr_gait src/hcr_gait.cpp)
 target_link_libraries(hcr_gait ${catkin_LIBRARIES})
