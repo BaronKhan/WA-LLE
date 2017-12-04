@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "hcr_gait_test_listener");
 	ros::NodeHandle n;	
-	ros::Subscriber sub = n.subscribe("gait_raw", 100, arrayCallback);
+	ros::Subscriber sub = n.subscribe("gait_raw_2D", 100, arrayCallback);
 
 	ros::spin();
 	return 0;

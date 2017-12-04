@@ -1,9 +1,11 @@
 # %Tag(FULLTEXT)%
+set (CMAKE_CXX_STANDARD 11)
 cmake_minimum_required(VERSION 2.8.3)
 project(hcr_walker)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs genmsg 
+                message_filters OpenCV cv_bridge openpose_ros)
 
 ## Declare ROS messages and services
 #add_message_files(FILES Num.msg)
@@ -28,6 +30,7 @@ target_link_libraries(listener ${catkin_LIBRARIES})
 
 add_executable(hcr_gait src/hcr_gait.cpp)
 target_link_libraries(hcr_gait ${catkin_LIBRARIES})
+add_dependencies(hcr_gait ${catkin_EXPORTED_TARGETS})
 
 add_executable(hcr_gait_test_listener src/hcr_gait_test_listener.cpp)
 target_link_libraries(hcr_gait_test_listener ${catkin_LIBRARIES})
