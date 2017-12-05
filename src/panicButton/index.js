@@ -77,7 +77,7 @@ dash.on('detected', () => {
   // for now we can ignore the promise as it handles any logging and we've no need to care about when it resolves or rejects
   sendSms(config.message.to, config.message.from, config.message.body)
     .then((response) => {
-      //
+      process.exit();
     })
     .catch((err) => {
       //
@@ -91,7 +91,7 @@ rl.question('Detected fall?', function(signal) {
   	console.log('Fall detected');
   	sendSms(config.message.to, config.message.from, config.message.body)
     .then((response) => {
-      //
+      process.exit();
     })
     .catch((err) => {
       //
