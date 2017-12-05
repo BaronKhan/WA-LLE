@@ -1,9 +1,0 @@
-rosparam set /cv_camera/device_id 0
-rosrun cv_camera cv_camera_node
-
-rosrun openpose_ros openpose_ros_node
-rosrun hcr_walker hcr_openpose_adapter.py
-
-rosparam set /usb_cam/video_device "/dev/video1"
-rosrun usb_cam usb_cam_node
-rosrun hcr_walker hcr_gait

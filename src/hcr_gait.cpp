@@ -16,6 +16,9 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
+// #define NUM_BODY_PARTS 15 // For MPI
+#define NUM_BODY_PARTS 18 // For COCO
+
 static const std::string OPENCV_WINDOW = "Image window";
 const std::map<unsigned int, std::string> POSE_MPI_BODY_PARTS {
         {0,  "Head"},
@@ -35,6 +38,27 @@ const std::map<unsigned int, std::string> POSE_MPI_BODY_PARTS {
         {14, "Chest"},
         {15, "Background"}
 };
+const std::map<unsigned int, std::string> POSE_COCO_BODY_PARTS {
+        {0,  "Nose"},
+        {1,  "Neck"},
+        {2,  "RShoulder"},
+        {3,  "RElbow"},
+        {4,  "RWrist"},
+        {5,  "LShoulder"},
+        {6,  "LElbow"},
+        {7,  "LWrist"},
+        {8,  "RHip"},
+        {9,  "RKnee"},
+        {10, "RAnkle"},
+        {11, "LHip"},
+        {12, "LKnee"},
+        {13, "LAnkle"},
+        {14, "REye"},
+        {15, "LEye"},
+        {16, "REar"},
+        {17, "LEar"},
+        {18, "Background"}
+};
 ros::Publisher gait_pub;
 ros::Publisher img_pub;
 typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, 
@@ -45,35 +69,36 @@ void callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::JointS
 {
   ROS_INFO("Got a synchronized thing!");
   std_msgs::Float64MultiArray array_msg; // Output message
-  array_msg.data.resize(45); // 15(MPI model) * 3(dimensional) points
+  array_msg.data.resize(NUM_BODY_PARTS*3); // Num joints to track * 3(dimensional) points
 
   // -------------GET REGISTERED RGB-D FRAME-------------
   cv_bridge::CvImagePtr cv_ptr;
   try {
     // Convert sensor_msgs:Image to OpenCV image 
-    cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::BGR8); // TYPE_16UC1);
+    cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::TYPE_8UC1); //BGR8);
   } catch (cv_bridge::Exception& e) {
     ROS_ERROR("cv_bridge exception: %s", e.what());
     return;
   }
 
   // -------------OPENPOSE TRACKED KEYPOINTS FROM FILE -------------
-  int keypoint_label = 0;
-  for (int i=0; i<45; i+=3)
+  for (int i=0; i<NUM_BODY_PARTS; i++)
   {
-    float x = keypoints->position[i];
-    float y = keypoints->position[i+1];
-    float depth = 0; // NEED TO GET ACTUAL PIXEL VALUES
-    array_msg.data.push_back(x);
-    array_msg.data.push_back(y);
-    array_msg.data.push_back(depth);
+    float x = keypoints->position[i*3];
+    float y = keypoints->position[i*3+1];
+    float depth;
+    if (x>=0 && y>=0) depth = cv_ptr->image.at<char>(cv::Point(x, y));
+    else depth = -1;
+    array_msg.data[i*3] = x;
+    array_msg.data[i*3+1] = y;
+    array_msg.data[i*3+2] = depth;
     // Draw an example circle on the video stream
     if (x < cv_ptr->image.cols && y < cv_ptr->image.rows)
     {
-      cv::circle(cv_ptr->image, cv::Point(x, y), 10, cv::Scalar(0,0,0), -1);
-      cv::putText(cv_ptr->image, POSE_MPI_BODY_PARTS.at(keypoint_label), cv::Point(x,y), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255,0,0));
+      cv::circle(cv_ptr->image, cv::Point(x, y), 2, cv::Scalar(255), -1);
+      cv::putText(cv_ptr->image, std::to_string((int)depth)/*POSE_COCO_BODY_PARTS.at(i)*/, cv::Point(x,y), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(255,0,0));
     }
-    keypoint_label++;
+    ROS_INFO("Body part number %d has x=%f, y=%f, d=%f", i, x, y, depth);
   }
   
   // -------------PUBLISH OUTPUT DATA------------- //
@@ -98,7 +123,7 @@ int main(int argc, char** argv)
 
   // cv::namedWindow(OPENCV_WINDOW);
 
-  message_filters::Subscriber<sensor_msgs::Image> image_sub(nh, "/cv_camera/image_raw", q);
+  message_filters::Subscriber<sensor_msgs::Image> image_sub(nh, "/camera/depth/image_rect_raw", q); //"/cv_camera/image_raw", q);
   message_filters::Subscriber<sensor_msgs::JointState> keypoint_sub(nh, "/hcr_walker/gait/openpose_keypoints", q);
   message_filters::Synchronizer<ApproxSyncPolicy> sync(ApproxSyncPolicy(q), image_sub, keypoint_sub);
   sync.registerCallback(boost::bind(&callback, _1, _2));

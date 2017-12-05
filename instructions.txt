@@ -1,0 +1,28 @@
+# Setting up dual-machine communications using ethernet cable
+
+1. Connect both computers using an ethernet cable.
+
+2. On Machine #1: (Ubuntu) Go to Edit Connections > Add > Ethernet. 
+a. Under Ethernet tab, select the Device from the dropdown menu (should only have one option if only one ethernet cable plugged in). 
+b. Under IPV4 tab, choose Method:Manual and Add:Address("10.0.0.1"), Netmask("24"), leave Gateway empty.
+c. Open a terminal and run "Hostname -I", you should see it print the address you just set ("10.0.0.1").
+d. Set the ROS environment variable: "export ROS_IP=10.0.0.1".
+e. Run "roscore", noting the "ROS_MASTER_URI" (should be "http://10.0.0.1:11311").
+
+3. On Machine #2: (Ubuntu) Go to Edit Connections > Add > Ethernet. Sel
+a. Under Ethernet tab, select the Device from the dropdown menu (should only have one option if only one ethernet cable plugged in). 
+b. Under IPV4 tab, choose Method:Manual and Add:Address("10.0.0.2"), Netmask("24"), leave Gateway empty.
+c. Open a terminal and run "Hostname -I", you should see it print the address you just set ("10.0.0.2").
+d. Set the ROS environment variable: "export ROS_IP=10.0.0.2".
+e. Set the ROS_MASTER_URI environment variable corresponding to Machine #1: "export ROS_MASTER_URI=http://10.0.0.1:11311").
+
+# Gait Detection
+rosparam set /cv_camera/device_id 0
+rosrun cv_camera cv_camera_node
+
+rosrun openpose_ros openpose_ros_node
+rosrun hcr_walker hcr_openpose_adapter.py
+
+#rosparam set /usb_cam/video_device "/dev/video1"
+rosrun usb_cam usb_cam_node
+rosrun hcr_walker hcr_gait
