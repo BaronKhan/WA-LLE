@@ -12,7 +12,7 @@ STATE_FALLING = 1
 STATE_FALLEN = 2
 
 FALLEN_ACC_DIFF = 0.3
-FALLEN_GYRO_DIFF = 50.0
+FALLEN_GYRO_DIFF = 42.0
 
 # Toggle features
 using_fall_prevention = True
@@ -46,10 +46,16 @@ def update_buffers(accel_mag, gyro_mag):
   global accel_mag_buf, gyro_mag_buf
   accel_mag_buf.append(accel_mag)
   gyro_mag_buf.append(gyro_mag)
-  while len(accel_mag_buf) > 5:
+  while len(accel_mag_buf) > 1:
     del accel_mag_buf[0]
-  while len(gyro_mag_buf) > 5:
+  while len(gyro_mag_buf) > 1:
     del gyro_mag_buf[0]
+
+def reset_buffers():
+  global accel_mag_buf, gyro_mag_buf, accel_mag_avg, gyro_mag_avg
+  accel_mag_avg = -1
+  gyro_mag_avg = -1
+
 
 def on_fallen():
   change_state(STATE_FALLEN)
@@ -90,7 +96,9 @@ def check_falling():
     # if using_fall_prevention and (accel_diff >= FALLEN_ACC_DIFF or gyro_diff >= FALLEN_GYRO_DIFF):
     if using_fall_prevention and (gyro_diff >= FALLEN_GYRO_DIFF):
       print("Fall is occuring! accel_diff = "+str(accel_diff)+", gyro_diff = "+str(gyro_diff))
+      reset_buffers()
       on_falling()
+      return
     # Update averages
     accel_mag_avg = sum(accel_mag_buf)/len(accel_mag_buf)
     gyro_mag_avg = sum(gyro_mag_buf)/len(gyro_mag_buf)
