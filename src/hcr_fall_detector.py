@@ -5,7 +5,7 @@ from random import randrange
 from sklearn import svm
 
 # Fall prevention: using threshold method
-# Fall detection: detect whether limbs are present in gait analysis after fall prevention fails
+# Fall detection: checking to see if the limbs are present in the gait analysis
 
 STATE_NORMAL = 0
 STATE_FALLING = 1
@@ -16,14 +16,16 @@ FALLEN_GYRO_DIFF = 50.0
 
 # Toggle features
 using_fall_prevention = True
-using_fall_detection = False
+using_fall_detection = True
 
 falling_state = STATE_NORMAL
 pub_falling_state = rospy.Publisher('falling_state', Int8, queue_size=1)
 
 imu_pos = []
-gait_raw = []
+gait_raw = [-1, -1, -1]
 
+accel_mag_buf = []
+gyro_mag_buf = []
 accel_mag_avg = -1
 gyro_mag_avg = -1
 
@@ -39,28 +41,61 @@ def change_state(state):
   pub_falling_state.publish(falling_state)
   print("new state: "+str(state))
 
+def update_buffers(accel_mag, gyro_mag):
+  # Update the circular buffers for calculating the average of the last 5 samples
+  global accel_mag_buf, gyro_mag_buf
+  accel_mag_buf.append(accel_mag)
+  gyro_mag_buf.append(gyro_mag)
+  while len(accel_mag_buf) > 5:
+    del accel_mag_buf[0]
+  while len(gyro_mag_buf) > 5:
+    del gyro_mag_buf[0]
+
+def on_fallen():
+  change_state(STATE_FALLEN)
+  time.sleep(5)
+  change_state(STATE_NORMAL)
+
+# Limb detection version
+def check_fallen():
+  global gait_raw
+  print("Checking limbs for whether user is standing: "+str(gait_raw))
+  # Check if the limbs are being detected in the gait analysis
+  for limb_point in gait_raw:
+    if float(limb_point) < 0:
+      print("A limb coordinate was not detected -> user has fallen!")
+      on_fallen()
+      return
+  print("All limb points detected")
+
 def on_falling():
   change_state(STATE_FALLING)
   time.sleep(5)
+  check_fallen()
   change_state(STATE_NORMAL)
 
 # Check Falling: Threshold version
 def check_falling():
-  global accel_mag_old, gyro_mag_old
+  global accel_mag_avg, gyro_mag_avg, accel_mag_buf, gyro_mag_buf
   ax, ay, az = imu_pos[0], imu_pos[1], imu_pos[2]
   wx, wy, wz = imu_pos[3], imu_pos[4], imu_pos[5]
   accel_mag = math.sqrt((ax*ax) + (ay*ay) + (az*az))
   gyro_mag = math.sqrt((wx*wx) + (wz*wz))
-  if accel_mag_old > 0 and gyro_mag_old > 0:
-    accel_diff = abs(accel_mag-accel_mag_old)
-    gyro_diff = abs(gyro_mag-gyro_mag_old)
-    print("accel_diff = "+str(accel_diff)+", gyro_diff = "+str(gyro_diff))
+  update_buffers(accel_mag, gyro_mag)
+  if accel_mag_avg > 0 and gyro_mag_avg > 0:
+    accel_diff = abs(accel_mag - accel_mag_avg)
+    gyro_diff = abs(gyro_mag - gyro_mag_avg)
+    print("accel_mag="+str(accel_mag)+", \tavg="+str(accel_mag_avg)+"\t|\tgyro_mag="+str(gyro_mag)+",\tavg="+str(gyro_mag_avg))
     # if using_fall_prevention and (accel_diff >= FALLEN_ACC_DIFF or gyro_diff >= FALLEN_GYRO_DIFF):
     if using_fall_prevention and (gyro_diff >= FALLEN_GYRO_DIFF):
-      print("Fall is occuring! accel_mag = "+str(accel_mag)+", gyro_mag = "+str(gyro_mag))
+      print("Fall is occuring! accel_diff = "+str(accel_diff)+", gyro_diff = "+str(gyro_diff))
       on_falling()
-  accel_mag_old = accel_mag
-  gyro_mag_old = gyro_mag
+    # Update averages
+    accel_mag_avg = sum(accel_mag_buf)/len(accel_mag_buf)
+    gyro_mag_avg = sum(gyro_mag_buf)/len(gyro_mag_buf)
+  else:
+    accel_mag_avg = accel_mag
+    gyro_mag_avg = gyro_mag
 
 # Check Falling: SVM version
 # def check_falling():
@@ -79,14 +114,6 @@ def check_falling():
 #     if y == 2 and using_fall_detection:
 #       print("User has fallen!")
 #       on_fallen()
-
-def on_fallen():
-  change_state(STATE_FALLEN)
-  time.sleep(5)
-  change_state(STATE_NORMAL)
-
-def check_fallen():
-  pass
 
 def imu_callback(data):
   global imu_pos
