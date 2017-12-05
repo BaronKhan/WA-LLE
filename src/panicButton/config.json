@@ -1,0 +1,14 @@
+{
+  "button": {
+    "id": "fc:a6:67:d9:52:50" 
+  },
+  "twilio": {  
+    "sid": "ACfe76123a3086b60d0a8cdeb2ac0046aa",
+    "token": "474d22fb12ce9be40632b4abc7b60079"
+  },
+  "message": {
+    "from": "+441158245676",  
+    "to": "+447932889770",  
+    "body": "Emergency!" 
+	}
+}
