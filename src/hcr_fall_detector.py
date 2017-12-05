@@ -22,7 +22,7 @@ falling_state = STATE_NORMAL
 pub_falling_state = rospy.Publisher('falling_state', Int8, queue_size=1)
 
 imu_pos = []
-gait_raw = [-1, -1, -1]
+gait_raw = []
 
 accel_mag_buf = []
 gyro_mag_buf = []
@@ -62,11 +62,12 @@ def check_fallen():
   print("Checking limbs for whether user is standing: "+str(gait_raw))
   # Check if the limbs are being detected in the gait analysis
   for limb_point in gait_raw:
-    if float(limb_point) < 0:
-      print("A limb coordinate was not detected -> user has fallen!")
-      on_fallen()
+    if float(limb_point) > 0: # -1 if limb point is not detected
+      print("A limb coordinate was detected -> user has probably not fallen")
       return
-  print("All limb points detected")
+  # No limbs found, user has probably fallen
+  print("No limb points detected --> user has fallen!")
+  on_fallen()
 
 def on_falling():
   change_state(STATE_FALLING)
