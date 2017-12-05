@@ -4,7 +4,7 @@ from std_msgs.msg import Int8, Float32MultiArray, Float64MultiArray
 from random import randrange
 from sklearn import svm
 
-# Fall prevention: using threshold method
+# Fall prevention: using threshold method + SVM
 # Fall detection: checking to see if the limbs are present and straight in the gait analysis
 
 STATE_NORMAL = 0
@@ -17,6 +17,7 @@ FALLEN_GYRO_DIFF = 42.0
 # Toggle features
 using_fall_prevention = True
 using_fall_detection = True
+using_svm = True
 
 falling_state = STATE_NORMAL
 pub_falling_state = rospy.Publisher('falling_state', Int8, queue_size=1)
@@ -143,27 +144,20 @@ def check_falling():
     gyro_mag_avg = gyro_mag
 
 # Check Falling: SVM version
-# def check_falling():
-#   global imu_pos, gait_raw, svm_clf
-#   if len(imu_pos) == 0 or len(gait_raw) == 0:
-#     return
-#   if svm_clf:
-#     fall_data=[imu_pos+gait_raw]
-#     y=round(svm_clf.predict(fall_data))
-#     if y == 1 and using_fall_prevention:
-#       print("User is falling!")
-#       on_falling()
-#     gait_raw = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] # Replace gait data with zeros
-#     fall_data=[imu_pos+gait_raw]
-#     y=round(svm_clf.predict(fall_data))
-#     if y == 2 and using_fall_detection:
-#       print("User has fallen!")
-#       on_fallen()
+def check_falling_svm():
+  global imu_pos, gait_raw, svm_clf
+  if len(imu_pos) == 0 or len(gait_raw) == 0:
+    return
+  if svm_clf:
+    fall_data=[imu_pos+gait_raw]
+    y=round(svm_clf.predict(fall_data))
+    if y == 1 and using_fall_prevention:
+      print("User is falling!")
+      on_falling()
 
 def imu_callback(data):
   global imu_pos
   imu_pos = data.data
-  # check_fallen()
   check_falling()
 
 def gait_callback(data):
@@ -174,35 +168,35 @@ def gait_callback(data):
   # Only get the leg data (RHip, RKnee, RAnkle, LHip, LKnee, LAnkle)
   gait_raw = gait_raw_all[24:42]
 
-# def load_svm_model():
-#   global svm_clf, using_fall_prevention
-#   # model path should be the first argument of the python program (w/svm_0.mdl)
-#   file_count = 0
-#   if (len(sys.argv) > 1):
-#     if (os.path.isfile(sys.argv[1])):
-#       try:
-#         svm_clf = pickle.load(open(sys.argv[1], "rb"))
-#         print("loaded "+sys.argv[1])
-#       except pickle.UnpicklingError:
-#         raise
-#       except Exception as e:
-#         raise pickle.UnpicklingError(repr(e))
-#     else:
-#       using_fall_prevention = False
-#       print(sys.argv[1]+" is not a valid path to a model\nfall prevention: disabled")
-#   else:
-#     print("warning: no svm model specified\nsvm_0.mdl will be loaded")
-#     if (os.path.isfile("w/svm_0.mdl")):
-#       try:
-#         svm_clf = pickle.load(open("w/svm_0.mdl", "rb"))
-#         print("loaded svm_0.mdl")
-#       except pickle.UnpicklingError:
-#         raise
-#       except Exception as e:
-#         raise pickle.UnpicklingError(repr(e))
-#     else:
-#       using_fall_prevention = False
-#       print("could not load svm_0.mdl\nfall prevention: disabled")
+def load_svm_model():
+  global svm_clf, using_svm
+  # model path should be the first argument of the python program (w/svm_0.mdl)
+  file_count = 0
+  if (len(sys.argv) > 1):
+    if (os.path.isfile(sys.argv[1])):
+      try:
+        svm_clf = pickle.load(open(sys.argv[1], "rb"))
+        print("loaded "+sys.argv[1])
+      except pickle.UnpicklingError:
+        raise
+      except Exception as e:
+        raise pickle.UnpicklingError(repr(e))
+    else:
+      using_svm = False
+      print(sys.argv[1]+" is not a valid path to a model\nfall prevention (SVM): disabled")
+  else:
+    print("warning: no svm model specified\nsvm_0.mdl will be loaded")
+    if (os.path.isfile("w/svm_0.mdl")):
+      try:
+        svm_clf = pickle.load(open("w/svm_0.mdl", "rb"))
+        print("loaded svm_0.mdl")
+      except pickle.UnpicklingError:
+        raise
+      except Exception as e:
+        raise pickle.UnpicklingError(repr(e))
+    else:
+      using_svm = False
+      print("could not load svm_0.mdl\nfall prevention (SVM): disabled")
 
 # Kill process with Ctrl+C
 signal.signal(signal.SIGINT, kill_process)
@@ -216,12 +210,14 @@ if __name__ == '__main__':
   if not (os.path.isdir("src")):
     sys.exit("couldn't find src/ dir (try executing in the top-level workspace dir)")
   print("fall prevention: "+("enabled" if using_fall_prevention else "disabled"))
+  print("fall prevention (SVM): "+("enabled" if using_svm else "disabled"))
   print("fall detection: "+("enabled" if using_fall_detection else "disabled"))
-  # if using_fall_prevention or using_fall_detection:
-  #   load_svm_model()
 
+  if using_svm:
+    load_svm_model()
+    
   while True:
-    # if using_fall_prevention or using_fall_detection:
-    #   check_falling()
+    if using_svm:
+      check_falling_svm()
     # Sleep to avoid consuming all the CPU at once
     time.sleep(0.1)
