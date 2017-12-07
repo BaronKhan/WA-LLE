@@ -58,6 +58,8 @@ def reset_buffers():
 
 
 def on_fallen():
+  # Alert emergency communications
+  os.system("echo 2 | sudo nodejs src/hcr_walker/src/panicButton/index.js")
   change_state(STATE_FALLEN)
   time.sleep(5)
   change_state(STATE_NORMAL)
@@ -176,6 +178,7 @@ if __name__ == '__main__':
   print("fall detection: "+("enabled" if using_fall_detection else "disabled"))
   # if using_fall_prevention or using_fall_detection:
   #   load_svm_model()
+
   while True:
     # if using_fall_prevention or using_fall_detection:
     #   check_falling()
