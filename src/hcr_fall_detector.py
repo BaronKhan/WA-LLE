@@ -5,7 +5,7 @@ from random import randrange
 from sklearn import svm
 
 # Fall prevention: using threshold method
-# Fall detection: checking to see if the limbs are present in the gait analysis
+# Fall detection: checking to see if the limbs are present and straight in the gait analysis
 
 STATE_NORMAL = 0
 STATE_FALLING = 1
@@ -56,10 +56,25 @@ def reset_buffers():
   accel_mag_avg = -1
   gyro_mag_avg = -1
 
+def leg_is_straight(hip, knee, ankle):
+  if hip.x > 0 and knee.x > 0:
+    # calculate angle from x-axis of hip to knee
+    rads = math.atan2(knee.y-hip.y,knee.x-hip.x)
+    angle = math.degrees(rads)
+    return (angle > 45 and angle < 135)
+  elif knee.x > 0 and ankle.x > 0:
+    # calculate angle from x-axis of knee to ankle
+    rads = math.atan2(ankle.y-knee.y,ankle.x-knee.x)
+    angle = math.degrees(rads)
+    return (angle > 45 and angle < 135)
+  else:
+    return False
 
 def on_fallen():
   # Alert emergency communications
+  print("alerting emergency comms...")
   os.system("echo 2 | sudo nodejs src/hcr_walker/src/panicButton/index.js")
+  print("successfully sent message")
   change_state(STATE_FALLEN)
   time.sleep(5)
   change_state(STATE_NORMAL)
@@ -67,15 +82,34 @@ def on_fallen():
 # Limb detection version
 def check_fallen():
   global gait_raw
-  print("Checking limbs for whether user is standing: "+str(gait_raw))
+  if len(gait_raw) == 0:
+    print("Error: gait_raw is empty. Skipping limb detection...")
+    return
+  print("Checking if limbs are being detected: gait_raw = "+str(gait_raw))
   # Check if the limbs are being detected in the gait analysis
+  limbs_detected = False
   for limb_point in gait_raw:
     if float(limb_point) > 0: # -1 if limb point is not detected
       print("A limb coordinate was detected -> user has probably not fallen")
-      return
-  # No limbs found, user has probably fallen
-  print("No limb points detected --> user has fallen!")
-  on_fallen()
+      limbs_detected = True
+      break
+  if not limbs_detected:
+    print("user has fallen!")
+    on_fallen()
+    return
+  print("Checking if user is standing...")
+  # Check if legs are straight
+  # Check right leg
+  hip, knee, ankle = gait_raw[:3], gait_raw[3:6], gait_raw[6:9]
+  right_leg_straight = leg_is_straight(hip, knee, ankle)
+  # Check left left
+  hip, knee, ankle = gait_raw[9:12], gait_raw[12:15], gait_raw[15:18]
+  left_leg_straight = leg_is_straight(hip, knee, ankle)
+  if left_leg_straight or right_leg_straight:
+    print("detected a straight leg -> user has probably not fallen")
+  else:
+    print("no straight legs detected -> user has fallen!")
+    on_fallen()
 
 def on_falling():
   change_state(STATE_FALLING)
@@ -134,7 +168,11 @@ def imu_callback(data):
 
 def gait_callback(data):
   global gait_raw
-  gait_raw = data.data
+  gait_raw_all = data.data
+  # Expecting 54 data points
+  assert(len(gait_raw_all) == 54)
+  # Only get the leg data (RHip, RKnee, RAnkle, LHip, LKnee, LAnkle)
+  gait_raw = gait_raw_all[24:42]
 
 # def load_svm_model():
 #   global svm_clf, using_fall_prevention
@@ -174,6 +212,9 @@ rospy.Subscriber("imu_pos", Float32MultiArray, imu_callback, queue_size=1)
 rospy.Subscriber("gait_raw", Float64MultiArray, gait_callback, queue_size=1)
 
 if __name__ == '__main__':
+  # Check we're in the right directory
+  if not (os.path.isdir("src")):
+    sys.exit("couldn't find src/ dir (try executing in the top-level workspace dir)")
   print("fall prevention: "+("enabled" if using_fall_prevention else "disabled"))
   print("fall detection: "+("enabled" if using_fall_detection else "disabled"))
   # if using_fall_prevention or using_fall_detection:
