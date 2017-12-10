@@ -31,7 +31,7 @@ distanceGreen = distanceGreenSensor(voltageGreen);
 
 activateLeft = activationLeft(fullActivationBoundary, partialActivationBoundary, distanceYellow, distanceGreen);
 
-activationRight(fullActivationBoundary, partialActivationBoundary, distanceStripy, distanceBlue);
+activateRight = activationRight(fullActivationBoundary, partialActivationBoundary, distanceStripy, distanceBlue);
 
 
 delay(1000);
