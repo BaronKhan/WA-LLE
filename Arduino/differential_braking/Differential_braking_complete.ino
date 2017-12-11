@@ -364,46 +364,52 @@ void LEDs(double left, double right){
 
 double activationLeft(double fullActivationBoundary, double partialActivationBoundary, double distanceYellow, double distanceGreen)
 {
+  //want this to be more sensitive the front yellow by a factor of 2
+  double distanceGreenSensitivity;
+  distanceGreenSensitivity = distanceGreen*2;
   double activateLeft;
-  if ( (distanceYellow<=fullActivationBoundary) || (distanceGreen <=fullActivationBoundary))
+
+  if ( (distanceYellow<=fullActivationBoundary) || (distanceGreenSensitivity <=fullActivationBoundary))
   {
     activateLeft = 1.0;
   }
 
-  if ( ((distanceYellow>=fullActivationBoundary) && (distanceYellow<=partialActivationBoundary)) || ((distanceGreen>=fullActivationBoundary) && (distanceGreen<=partialActivationBoundary)))
+  if ( ((distanceYellow>=fullActivationBoundary) && (distanceYellow<=partialActivationBoundary)) || ((distanceGreenSensitivity>=fullActivationBoundary) && (distanceGreenSensitivity<=partialActivationBoundary)))
   {
-    if(distanceYellow<distanceGreen)
+    if(distanceYellow<distanceGreenSensitivity)
     {
       activateLeft = linearRelationship(distanceYellow,partialActivationBoundary,fullActivationBoundary);
     }
-    if(distanceYellow>distanceGreen)
+    if(distanceYellow>distanceGreenSensitivity)
     {
-      activateLeft = linearRelationship(distanceGreen,partialActivationBoundary,fullActivationBoundary);
+      activateLeft = linearRelationship(distanceGreenSensitivity,partialActivationBoundary,fullActivationBoundary);
     }
   }
-
   return activateLeft;
   
 }
 
 double activationRight(double fullActivationBoundary, double partialActivationBoundary, double distanceStripy, double distanceBlue)
 {
+  //want this to be more sensitive the front yellow by a factor of 2
+  double distanceBlueSensitivity;
+  distanceBlueSensitivity = distanceBlue*2;
   double activateRight;
   
-  if ( (distanceStripy<=fullActivationBoundary) || (distanceBlue <=fullActivationBoundary))
+  if ( (distanceStripy<=fullActivationBoundary) || (distanceBlueSensitivity <=fullActivationBoundary))
   {
       activateRight = 1.0;
   }
 
-  if ( ((distanceStripy>=fullActivationBoundary) && (distanceStripy<=partialActivationBoundary)) || ((distanceBlue>=fullActivationBoundary) && (distanceBlue<=partialActivationBoundary)))
+  if ( ((distanceStripy>=fullActivationBoundary) && (distanceStripy<=partialActivationBoundary)) || ((distanceBlueSensitivity>=fullActivationBoundary) && (distanceBlueSensitivity<=partialActivationBoundary)))
   {
-    if(distanceStripy<distanceBlue)
+    if(distanceStripy<distanceBlueSensitivity)
     {
       activateRight = linearRelationship(distanceStripy,partialActivationBoundary,fullActivationBoundary);
     }
-    if(distanceStripy>distanceBlue)
+    if(distanceStripy>distanceBlueSensitivity)
     {
-      activateRight = linearRelationship(distanceBlue,partialActivationBoundary,fullActivationBoundary);
+      activateRight = linearRelationship(distanceBlueSensitivity,partialActivationBoundary,fullActivationBoundary);
     }
   }
 
