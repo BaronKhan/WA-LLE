@@ -307,59 +307,58 @@ double checkSpeedRight(){
 
 void LEDs(double left, double right){
   //LEDs 0-5 are left, 6-11 are right
-  digitalWrite(LED0, LOW);
-  digitalWrite(LED1, LOW);
-  digitalWrite(LED2, LOW);
-  digitalWrite(LED3, LOW);
-  digitalWrite(LED4, LOW);
-  digitalWrite(LED5, LOW);
-  digitalWrite(LED6, LOW);
-  digitalWrite(LED7, LOW);
-  digitalWrite(LED8, LOW);
-  digitalWrite(LED9, LOW);
-  digitalWrite(LED10, LOW);
-  digitalWrite(LED11, LOW);
-
+  digitalWrite(LED0, HIGH);
+  digitalWrite(LED1, HIGH);
+  digitalWrite(LED2, HIGH);
+  digitalWrite(LED3, HIGH);
+  digitalWrite(LED4, HIGH);
+  digitalWrite(LED5, HIGH);
+  digitalWrite(LED6, HIGH);
+  digitalWrite(LED7, HIGH);
+  digitalWrite(LED8, HIGH);
+  digitalWrite(LED9, HIGH);
+  digitalWrite(LED10, HIGH);
+  digitalWrite(LED11, HIGH);
+/*
   //Set left LEDs
-  if ((left < 0) && (left > 0.16)){
-    digitalWrite(LED0, HIGH);
+  if (left > 0){
+    digitalWrite(LED5, LOW);
   }
-  if (left < 0.16){
-    digitalWrite(LED1, HIGH);
+  if (left > 0.16){
+    digitalWrite(LED4, LOW);
   }
-  if (left < 0.33){
-    digitalWrite(LED2, HIGH);
+  if (left > 0.33){
+    digitalWrite(LED3, LOW);
   }
-  if (left < 0.5){
-    digitalWrite(LED3, HIGH);
+  if (left > 0.5){
+    digitalWrite(LED2, LOW);
   }
-  if (left < 0.66){
-    digitalWrite(LED4, HIGH);
+  if (left > 0.66){
+    digitalWrite(LED1, LOW);
   }
-  if (left < 0.83){
-    digitalWrite(LED5, HIGH);
+  if (left > 0.83){
+    digitalWrite(LED0, LOW);
   }
 
   //Set right LEDs
-  if ((right < 0) && (left > 0.16)){
-    digitalWrite(LED11, HIGH);
+  if (left > 0.16){
+    digitalWrite(LED11, LOW);
   }
-  if (right < 0.16){
-    digitalWrite(LED10, HIGH);
+  if (right > 0.16){
+    digitalWrite(LED10, LOW);
   }
-  if (right < 0.33){
-    digitalWrite(LED9, HIGH);
+  if (right > 0.33){
+    digitalWrite(LED9, LOW);
   }
-  if (right < 0.5){
-    digitalWrite(LED8, HIGH);
+  if (right > 0.5){
+    digitalWrite(LED8, LOW);
   }
-  if (right < 0.66){
-    digitalWrite(LED7, HIGH);
+  if (right > 0.66){
+    digitalWrite(LED7, LOW);
   }
-  if (right < 0.83){
-    digitalWrite(LED6, HIGH);
-  }
-  
+  if (right > 0.83){
+    digitalWrite(LED6, LOW);
+  }*/
 }
 
 double activationLeft(double fullActivationBoundary, double partialActivationBoundary, double distanceYellow, double distanceGreen)
@@ -382,6 +381,16 @@ double activationLeft(double fullActivationBoundary, double partialActivationBou
       activateLeft = linearRelationship(distanceGreen,partialActivationBoundary,fullActivationBoundary);
     }
   }
+  else
+  {
+    activateLeft = 0.0;
+  }
+
+  Serial.write("Distance from yellow sensor is: ");
+  Serial.println(distanceYellow, DEC);
+
+  Serial.write("Modified distance from green sensor is: ");
+  Serial.println(distanceGreen, DEC);
 
   return activateLeft;
   
@@ -407,6 +416,16 @@ double activationRight(double fullActivationBoundary, double partialActivationBo
       activateRight = linearRelationship(distanceBlue,partialActivationBoundary,fullActivationBoundary);
     }
   }
+  else
+  {
+    activateRight = 0.0;
+  }
+
+  Serial.write("Distance from stripy sensor is: ");
+  Serial.println(distanceStripy, DEC);
+
+  Serial.write("Modified distance from blue sensor is: ");
+  Serial.println(distanceBlue, DEC);
 
   return activateRight;
 
@@ -428,6 +447,24 @@ double sqrtRelationship(double distance,double x1, double x2)
 {
   double percentActivation = sqrt(1-((distance - x2)/(x1-x2)));
   return percentActivation;
+}
+
+double distanceBrownSensor(double voltage)
+{
+  double e = 2.718;
+  double distance = 511800 * pow(e,(-13.7*voltage)) + 55.75 * pow(e,(-0.7524*voltage));
+  if(distance<10)
+  {
+    return 0;
+  }
+  if(distance>80)
+  {
+    return distance = 100;
+  }
+  else
+  {
+    return distance;
+  }
 }
 
 double distanceBlueSensor(double voltage)
@@ -543,7 +580,7 @@ void loop() {
   tempBlue = analogRead(0);
   voltageBlue = tempBlue * 5 / 1024;
   //want this to be more sensitive the front stripy by a factor of 2
-  distanceBlue = distanceBlueSensor(voltageBlue*2);
+  distanceBlue = distanceBlueSensor(voltageBlue);
   
   tempStripy = analogRead(1);
   voltageStripy = tempStripy * 5 / 1024;
@@ -556,10 +593,16 @@ void loop() {
   tempGreen = analogRead(3);
   voltageGreen = tempGreen * 5 / 1024;
   //want this to be more sensitive the front yellow by a factor of 2
-  distanceGreen = distanceGreenSensor(voltageGreen*2);
+  distanceGreen = distanceGreenSensor(voltageGreen);
   
-  activateLeft = activationLeft(fullActivationBoundary, partialActivationBoundary, distanceYellow, distanceGreen);
-  activateRight = activationRight(fullActivationBoundary, partialActivationBoundary, distanceStripy, distanceBlue);
+  activateLeft = 1 - activationLeft(fullActivationBoundary, partialActivationBoundary, distanceYellow, distanceGreen);
+  activateRight = 1 - activationRight(fullActivationBoundary, partialActivationBoundary, distanceStripy, distanceBlue);
+
+  Serial.write("Left activation factor is: ");
+  Serial.println(activateLeft, DEC);
+
+  Serial.write("Right activation factor is: ");
+  Serial.println(activateRight, DEC);
 
   //Check for a fall detection
   double noFall = 1.0;
