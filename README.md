@@ -24,20 +24,24 @@ source ./devel/setup.bash
 roscore
 ```
 
-5. Open a new terminal and run the talker (publisher):
+5. Run Astra node
 ```
-rosrun beginner_tutorials talker
+roslaunch astra_launch astra.launch
 ```
-You should see messages printing on the terminal, corresponding to the message being published.
 
-6. Open a new terminal and run the listener (subscriber):
+6. Run OpenPose node and adapter
 ```
-rosrun beginner_tutorials listener
+rosrun openpose_ros openpose_ros_node
+rosrun hcr_walker hcr_openpose_adapter.py
 ```
-You should see messages printing on the terminal, corresponding to the messages received (should be same as those sent by the talker).
+
+7. Run gait detection and publisher
+```
+rosrun hcr_walker hcr_gait
+```
 
 ## Nodes
-- `talker` : Basic subsrciber example
+- `talker` : Basic subscriber example
 - `listener` : Basic publisher example
 - `fall_data_collector`: collects fall data from IMU and gait analysis, and writes them to CSV files
 - `fall_detector`: determines the falling state of the user
