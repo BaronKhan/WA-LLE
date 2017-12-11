@@ -364,56 +364,48 @@ void LEDs(double left, double right){
 
 double activationLeft(double fullActivationBoundary, double partialActivationBoundary, double distanceYellow, double distanceGreen)
 {
-  //want this to be more sensitive the front yellow by a factor of 2
-  double distanceGreenSensitivity;
-  distanceGreenSensitivity = distanceGreen*2;
   double activateLeft;
 
-  if ( (distanceYellow<=fullActivationBoundary) || (distanceGreenSensitivity <=fullActivationBoundary))
+  if ( (distanceYellow<=fullActivationBoundary) || (distanceGreen <=fullActivationBoundary))
   {
     activateLeft = 1.0;
   }
 
-  if ( ((distanceYellow>=fullActivationBoundary) && (distanceYellow<=partialActivationBoundary)) || ((distanceGreenSensitivity>=fullActivationBoundary) && (distanceGreenSensitivity<=partialActivationBoundary)))
+  if ( ((distanceYellow>=fullActivationBoundary) && (distanceYellow<=partialActivationBoundary)) || ((distanceGreen>=fullActivationBoundary) && (distanceGreen<=partialActivationBoundary)))
   {
-    if(distanceYellow<distanceGreenSensitivity)
+    if(distanceYellow<distanceGreen)
     {
       activateLeft = linearRelationship(distanceYellow,partialActivationBoundary,fullActivationBoundary);
     }
-    if(distanceYellow>distanceGreenSensitivity)
+    if(distanceYellow>distanceGreen)
     {
-      activateLeft = linearRelationship(distanceGreenSensitivity,partialActivationBoundary,fullActivationBoundary);
+      activateLeft = linearRelationship(distanceGreen,partialActivationBoundary,fullActivationBoundary);
     }
   }
-
   return activateLeft;
   
 }
 
 double activationRight(double fullActivationBoundary, double partialActivationBoundary, double distanceStripy, double distanceBlue)
 {
-  //want this to be more sensitive the front yellow by a factor of 2
-  double distanceBlueSensitivity;
-  distanceBlueSensitivity = distanceBlue*2;
   double activateRight;
   
-  if ( (distanceStripy<=fullActivationBoundary) || (distanceBlueSensitivity <=fullActivationBoundary))
+  if ( (distanceStripy<=fullActivationBoundary) || (distanceBlue <=fullActivationBoundary))
   {
       activateRight = 1.0;
   }
 
-  if ( ((distanceStripy>=fullActivationBoundary) && (distanceStripy<=partialActivationBoundary)) || ((distanceBlueSensitivity>=fullActivationBoundary) && (distanceBlueSensitivity<=partialActivationBoundary)))
+  if ( ((distanceStripy>=fullActivationBoundary) && (distanceStripy<=partialActivationBoundary)) || ((distanceBlue>=fullActivationBoundary) && (distanceBlue<=partialActivationBoundary)))
   {
-    if(distanceStripy<distanceBlueSensitivity)
+    if(distanceStripy<distanceBlue)
     {
       activateRight = linearRelationship(distanceStripy,partialActivationBoundary,fullActivationBoundary);
     }
-    if(distanceStripy>distanceBlueSensitivity)
+    if(distanceStripy>distanceBlue)
     {
-      activateRight = linearRelationship(distanceBlueSensitivity,partialActivationBoundary,fullActivationBoundary);
+      activateRight = linearRelationship(distanceBlue,partialActivationBoundary,fullActivationBoundary);
     }
   }
-
   return activateRight;
 
 }
@@ -548,7 +540,8 @@ void loop() {
 
   tempBlue = analogRead(0);
   voltageBlue = tempBlue * 5 / 1024;
-  distanceBlue = distanceBlueSensor(voltageBlue);
+  //want this to be more sensitive the front yellow by a factor of 2
+  distanceBlue = distanceBlueSensor(voltageBlue*2);
   
   tempStripy = analogRead(1);
   voltageStripy = tempStripy * 5 / 1024;
@@ -560,7 +553,8 @@ void loop() {
   
   tempGreen = analogRead(3);
   voltageGreen = tempGreen * 5 / 1024;
-  distanceGreen = distanceGreenSensor(voltageGreen);
+  //want this to be more sensitive the front yellow by a factor of 2
+  distanceGreen = distanceGreenSensor(voltageGreen*2);
   
   activateLeft = activationLeft(fullActivationBoundary, partialActivationBoundary, distanceYellow, distanceGreen);
   activateRight = activationRight(fullActivationBoundary, partialActivationBoundary, distanceStripy, distanceBlue);
