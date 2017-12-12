@@ -37,7 +37,7 @@ def kill_process(signal, frame):
 
 def change_state(state):
   global falling_state
-  falling_state = STATE_FALLEN
+  falling_state = state
   pub_falling_state.publish(falling_state)
   print("new state: "+str(state))
 
