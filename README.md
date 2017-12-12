@@ -52,4 +52,7 @@ The fall detector nodes need SciPy and sklearn. Install them on the Rapsberry Pi
 
 ## Checklist
 - [x] Design report
-- [ ] Everything else
+- [ ] Fix limb detection
+- [ ] Write USB node
+- [ ] Integration
+- [ ] Testing
