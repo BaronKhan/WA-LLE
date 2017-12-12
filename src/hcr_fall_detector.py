@@ -213,8 +213,8 @@ rospy.Subscriber("gait_raw", Float64MultiArray, gait_callback, queue_size=1)
 
 if __name__ == '__main__':
   # Check we're in the right directory
-  if not (os.path.isdir("src")):
-    sys.exit("couldn't find src/ dir (try executing in the top-level workspace dir)")
+  #if not (os.path.isdir("src")):
+  #  sys.exit("couldn't find src/ dir (try executing in the top-level workspace dir)")
   print("fall prevention: "+("enabled" if using_fall_prevention else "disabled"))
   print("fall detection: "+("enabled" if using_fall_detection else "disabled"))
   # if using_fall_prevention or using_fall_detection:
