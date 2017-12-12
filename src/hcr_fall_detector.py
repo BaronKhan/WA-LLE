@@ -12,7 +12,7 @@ STATE_FALLING = 1
 STATE_FALLEN = 2
 
 FALLEN_ACC_DIFF = 0.3
-FALLEN_GYRO_DIFF = 42.0
+FALLEN_GYRO_DIFF = 41.5
 
 # Toggle features
 using_fall_prevention = True
@@ -64,7 +64,7 @@ def leg_is_straight(hip, knee, ankle):
     return (angle > 45 and angle < 135)
   elif knee[0] > 0 and ankle[0] > 0:
     # calculate angle from x-axis of knee to ankle
-    rads = math.atan2(ankle.[1]-knee[1],ankle[0]-knee[0])
+    rads = math.atan2(ankle[1]-knee[1],ankle[0]-knee[0])
     angle = math.degrees(rads)
     return (angle > 45 and angle < 135)
   else:
