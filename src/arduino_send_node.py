@@ -16,11 +16,9 @@ def callback(data):
     global brakes
     fallingState = data.data
     if fallingState == 0:			#Any other value can be passed as an all clear
-	brakes.write ('0') #Apply brakes
-        time.sleep(5)
+        brakes.write ('0') #Apply brakes
     else:
         brakes.write('1') #Normal activity
-        time.sleep(5)
 
 # This ends up being the main while loop.
 def listener():
