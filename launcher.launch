@@ -4,5 +4,5 @@
     <node name="openpose_adaptor" pkg="hcr_walker" type="hcr_openpose_adapter.py" />
     <node name="gait_detection" pkg="hcr_walker" type="hcr_gait" />
     <node name="hcr_imu" pkg="hcr_walker" type="hcr_imu.py" />
-    <node name="usb_node" pkg="hcr_walker" type="arduino_send_node.py"/>
+    <node name="usb_node" pkg="hcr_walker" type="arduino_send_node.py" output="screen"/>
 </launch>
