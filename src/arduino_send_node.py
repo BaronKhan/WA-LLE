@@ -15,8 +15,8 @@ brakes = None
 def callback(data):
     global brakes
     fallingState = data.data
-	if fallingState != 0:			#Any other value can be passed as an all clear
-		brakes.write(0) #Apply brakes
+    if fallingState != 0:			#Any other value can be passed as an all clear
+	brakes.write(0) #Apply brakes
         time.sleep(5)
     else:
         brakes.write(1) #Normal activity
