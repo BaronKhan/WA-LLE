@@ -57,14 +57,14 @@ def reset_buffers():
   gyro_mag_avg = -1
 
 def leg_is_straight(hip, knee, ankle):
-  if hip.x > 0 and knee.x > 0:
+  if hip[0] > 0 and knee[0] > 0:
     # calculate angle from x-axis of hip to knee
-    rads = math.atan2(knee.y-hip.y,knee.x-hip.x)
+    rads = math.atan2(knee[1]-hip[1],knee[0]-hip[0])
     angle = math.degrees(rads)
     return (angle > 45 and angle < 135)
-  elif knee.x > 0 and ankle.x > 0:
+  elif knee[0] > 0 and ankle[0] > 0:
     # calculate angle from x-axis of knee to ankle
-    rads = math.atan2(ankle.y-knee.y,ankle.x-knee.x)
+    rads = math.atan2(ankle.[1]-knee[1],ankle[0]-knee[0])
     angle = math.degrees(rads)
     return (angle > 45 and angle < 135)
   else:
