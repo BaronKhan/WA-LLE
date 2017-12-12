@@ -25,7 +25,7 @@ def callback(data):
 # This ends up being the main while loop.
 def listener():
     # Create a subscriber with appropriate topic, custom message and name of callback function.
-    rospy.Subscriber("falling_state", Int8, callback)
+    rospy.Subscriber("falling_state", Int8, callback, queue_size=1)
     # Wait for messages on topic, go to callback function when new messages arrive.
     rospy.spin()
 
