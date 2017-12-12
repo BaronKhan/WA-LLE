@@ -17,7 +17,7 @@ FALLEN_GYRO_DIFF = 42.0
 # Toggle features
 using_fall_prevention = True
 using_fall_detection = True
-using_svm = True
+using_svm = False
 
 falling_state = STATE_NORMAL
 pub_falling_state = rospy.Publisher('falling_state', Int8, queue_size=1)
