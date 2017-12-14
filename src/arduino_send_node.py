@@ -15,14 +15,14 @@ brakes = None
 def callback(data):
     global brakes
     fallingState = data.data
-    print("sending to usb..")
+    print("sending to usb..", fallingState)
     if fallingState == 0:			#Any other value can be passed as an all clear
         brakes.write ('0') #Apply brakes
-        time.sleep(5)
     else:
         brakes.write('1') #Normal activity
-        time.sleep(5)
-    print("sent to usb")
+    time.sleep(0.01)
+    brakes.flush()
+    print('Sent to usb')
 
 # This ends up being the main while loop.
 def listener():
@@ -36,6 +36,6 @@ if __name__ == '__main__':
     # Initialize the node and name it.
     rospy.init_node('arduino_send_node', anonymous = True)
     # Initialize serial connection
-    brakes = serial.Serial("/dev/ttyACM0", 9600)	#Setup serial connection
+    brakes = serial.Serial("/dev/ttyACM1", 9600)	#Setup serial connection
     # Go to the main loop.
     listener()
