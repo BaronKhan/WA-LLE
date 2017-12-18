@@ -40,19 +40,36 @@ rosrun hcr_walker hcr_openpose_adapter.py
 rosrun hcr_walker hcr_gait
 ```
 
+8. Run IMU and fall detector
+```
+rosrun hcr_walker arduino_send_node.py
+rosrun hcr_walker hcr_imu.py
+rosrun hcr_walker fall_detector.py
+```
+
+9. Run panic button
+```
+sudo nodejs src/panicButton/index.js
+```
+
 ## Nodes
-- `talker` : Basic subscriber example
-- `listener` : Basic publisher example
+- `arduino_send_node` : USB serial connection between ROS and Arduino
+- `hcr_imu` : Connects to an IMU and publishes its gyroscope and accelerometer components
+- `hcr_gait` : gait detection node using OpenPose
 - `fall_data_collector`: collects fall data from IMU and gait analysis, and writes them to CSV files
 - `fall_detector`: determines the falling state of the user
 - `fall_detector_trainer`: creates an SVM classification model
 
+#### IMU requirements
+The IMU requires bluez and bluepy. Install them using `sudo apt-get install bluez` and `sudo pip install bluepy`.
+
 #### Fall Detection Requirements
-The fall detector nodes need SciPy and sklearn. Install them on the Rapsberry Pi using `sudo apt-get install python-scipy python-sklearn`
+The fall detector nodes need SciPy and sklearn. Install them using `sudo apt-get install python-scipy python-sklearn`.
 
 ## Checklist
 - [x] Design report
-- [ ] Fix limb detection
-- [ ] Write USB node
-- [ ] Integration
-- [ ] Testing
+- [x] Fix limb detection
+- [x] Write USB node
+- [x] Integration
+- [x] Testing
+- [ ] Final report
