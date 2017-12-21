@@ -66,7 +66,7 @@ def leg_is_straight(hip, knee, ankle):
     # calculate angle from x-axis of knee to ankle
     rads = math.atan2(ankle[1]-knee[1],ankle[0]-knee[0])
     angle = math.degrees(rads)
-    return (angle > 45 and angle < 225)
+    return (angle > 45 and angle < 135)
   else:
     return False
 
