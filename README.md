@@ -1,6 +1,6 @@
 # WA-LLE: Walking Aid - Limitless Living for the Elderly
 
-This repository contains work for that has been done to develop robotic walking aids for the elderly.
+This repository contains work that has been done to develop robotic walking aids for the elderly.
 
 *This README should always reflect the current state of the repository. If you create a new node, please add it to the Nodes section below with a short description and update the Usage instructions as necessary.*
 
@@ -63,7 +63,7 @@ sudo nodejs src/panicButton/index.js
 The IMU requires bluez and bluepy. Install them using `sudo apt-get install bluez` and `sudo pip install bluepy`.
 
 #### Fall Detection Requirements
-The fall detector nodes need SciPy and sklearn. Install them using `sudo apt-get install python-scipy python-sklearn`.
+The fall detector nodes need SciPy and sklearn in order to use the SVM (diabled by default). Install them using `sudo apt-get install python-scipy python-sklearn`.
 
 ## Contributors
 - mdhchan
