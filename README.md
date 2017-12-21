@@ -1,7 +1,6 @@
-# HCR-walker
-This repo contains a single catkin-style ROS package, and all the ROS nodes should be contained in this package (we clone this repo in the src/ directory our own catkin workspaces).
+# WA-LLE: Walking Aid - Limitless Living for the Elderly
 
-Current code is just the basic publisher/subscriber example for C++. A similar setup is possible with Python, following [this tutorial](http://wiki.ros.org/ROS/Tutorials/WritingPublisherSubscriber%28python%29).
+This repository contains work for that has been done to develop robotic walking aids for the elderly.
 
 *This README should always reflect the current state of the repository. If you create a new node, please add it to the Nodes section below with a short description and update the Usage instructions as necessary.*
 
@@ -66,10 +65,10 @@ The IMU requires bluez and bluepy. Install them using `sudo apt-get install blue
 #### Fall Detection Requirements
 The fall detector nodes need SciPy and sklearn. Install them using `sudo apt-get install python-scipy python-sklearn`.
 
-## Checklist
-- [x] Design report
-- [x] Fix limb detection
-- [x] Write USB node
-- [x] Integration
-- [x] Testing
-- [ ] Final report
+## Contributors
+- mdhchan
+- sabrinalucy96
+- liu09222003
+- JunShern
+- BaronKhan
+- JB515
